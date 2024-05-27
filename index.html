@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BowlPro Entrar</title>
+    <style>
+        .form-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Você é cliente ou Administrador?</h1>
+    <select id="formSelector" onchange="showForm()">
+        <option value="">Selecione uma das opções</option>
+        <option value="form1">Cliente</option>
+        <option value="form2">ADM</option>
+    </select>
+
+    <div id="form1" class="form-container">
+        <h2>Cliente</h2>
+        <form name="form_login_cliente"  action="bowlpro/valida_cliente.php" method="post">
+            <label for="nome">Email:</label>
+            <input type="email" id="email" name="email"><br><br>
+            <label for="email">Senha:</label>
+            <input type="password" id="senha" name="senha"><br><br>
+            <input type="submit" value="Enviar">
+        </form>
+    </div>
+
+    <div id="form2" class="form-container">
+        <h2>Administrador</h2>
+        <form name="form_login_adm"  action="bowlpro/valida_adm.php" method="post">
+            <label for="endereco">Senha:</label>
+            <input type="password" id="senhaadm" name="senhaadm"><br><br>
+            <input type="submit" value="Enviar">
+        </form>
+    </div>
+    <div>
+        <a href="bowlpro/cad_user/cad_nova_senha.html" target="_self">Esqueceu a senha?</a>
+        <br>
+        <a href="bowlpro/cad_user/cad_user.html" target="_blank">Cadastre-se</a>
+    </div>
+
+    <script>
+        function showForm() {
+            var selectedForm = document.getElementById('formSelector').value;
+            var forms = document.getElementsByClassName('form-container');
+            for (var i = 0; i < forms.length; i++) {
+                forms[i].style.display = 'none';
+            }
+            if (selectedForm) {
+                document.getElementById(selectedForm).style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
