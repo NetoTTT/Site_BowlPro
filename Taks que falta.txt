@@ -1,0 +1,3 @@
+fazer "esqeuceu a senha"
+coloca a funcionalidades de editar no funcionario
+colocar no cliente a mesma funcionalidades dos agendamentos (apagar)

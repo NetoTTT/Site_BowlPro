@@ -40,31 +40,36 @@ $result = $conn->query($sql);
 <body>
     <div class="admin-container">
         <h1>Lista de Agendamentos</h1>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Email do Cliente</th>
-                <th>Data</th>
-                <th>Horário</th>
-            </tr>
-            <?php
-            // Verificar se há resultados e exibir os dados em uma tabela
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row["id_horario"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["email_cliente"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["data_horario"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["horario"]) . "</td>";
-                    echo "</tr>";
+        <form action="processar_agendamentos.php" method="POST">
+            <table>
+                <tr>
+                    <th>Selecionar</th>
+                    <th>ID</th>
+                    <th>Email do Cliente</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                </tr>
+                <?php
+                if ($result->num_rows > 0) {
+                    while($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td><input type='checkbox' name='agendamentos_selecionados[]' value='" . htmlspecialchars($row["id_horario"]) . "'></td>";
+                        echo "<td>" . htmlspecialchars($row["id_horario"]) . "</td>";
+                        echo "<td>" . htmlspecialchars($row["email_cliente"]) . "</td>";
+                        echo "<td>" . htmlspecialchars($row["data_horario"]) . "</td>";
+                        echo "<td>" . htmlspecialchars($row["horario"]) . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='5'>Nenhum agendamento encontrado.</td></tr>";
                 }
-            } else {
-                echo "<tr><td colspan='4'>Nenhum agendamento encontrado.</td></tr>";
-            }
-
-            $conn->close();
-            ?>
-        </table>
+                ?>
+            </table>
+            <div>
+                <button type="submit" name="action" value="edit">Editar</button>
+                <button type="submit" name="action" value="delete">Apagar</button>
+            </div>
+        </form>
         <div class="buttons">
             <button onclick="window.location.href='/bowlpro/tela_adm/tela_adm.html'">Voltar</button>
         </div>
