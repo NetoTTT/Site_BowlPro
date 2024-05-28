@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO funcionarios (nome, tel, email, cpf, cargo, cad_unico) VALUES (?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssss", $nome, $tel, $email, $cpf, $cargo, $cad_unico);
+    $stmt->bind_param("ssssss", $nome, $tel, $email, $cpf, $cargo, $cad_unico);
 
     if ($stmt->execute()) {
         echo "<script>alert('Funcionário cadastrado com sucesso.'); window.location.href = '/bowlpro/tela_adm/tela_adm.html';</script>";
