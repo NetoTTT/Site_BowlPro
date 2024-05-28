@@ -3,9 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tela Administração</title>
+    <link rel="stylesheet" href="css/style.css">
+    <title>Painel do Administrador</title>
 </head>
 <body>
-    <h1>Tela Admin</h1>
+    <div class="admin-container">
+        <h1>Painel do Administrador</h1>
+
+        <!-- Ações para Funcionários -->
+        <div class="admin-actions">
+            <div class="actions">
+                <button onclick="window.location.href='found_fun/ver_todos_funcionarios.php'">Ver Todos os Funcionários</button>
+                <form method="POST" action="found_fun/pesquisar_funcionario.php">
+                    <input type="text" name="cad_unico" placeholder="Pesquisar Funcionário por CAD Único">
+                    <button type="submit">Pesquisar</button>
+                </form>
+            </div>
+
+            <!-- Ações para Clientes -->
+            <div class="actions">
+                <button onclick="window.location.href='found_cli/ver_todos_clientes.php'">Ver Todos os Clientes</button>
+                <form method="POST" action="found_cli/pesquisar_cliente.php">
+                    <input type="text" name="pesquisa" placeholder="Pesquisar Cliente por Nome ou Email">
+                    <button type="submit">Pesquisar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Outros Botões -->
+        <div class="buttons">
+            <button onclick="window.location.href='cad_fun/cadastrar_funcionario.php'">Cadastrar Funcionário</button>
+            <button onclick="window.location.href='del_all/apagar_funcionario.php'">Apagar Funcionário</button>
+            <button onclick="window.location.href='found_agen/ver_todos_agendamentos.php'">Ver Todos os Agendamentos</button>
+            <button onclick="window.location.href='del_all/apagar_cliente.php'">Apagar Cliente</button>
+            <button onclick="window.location.href='/index.html'">Sair</button>
+        </div>
+    </div>
 </body>
 </html>

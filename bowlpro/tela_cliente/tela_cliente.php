@@ -9,19 +9,30 @@
 <body>
     <div class="profile-container">
         <div class="profile-pic">P</div>
-       <div><H2> <?php include("nome_cliente.php"); ?> </H2></div>
+        <div><h2><?php include("nome_cliente.php"); ?></h2></div>
         <div class="buttons">
             <a href="agendar_horario/agendar_horario.php">Agendar um horário</a>
         </div>
         <div class="appointments">
             <h3>Horários Agendados:</h3>
             <ul>
-               <?php include 'listar_horarios.php'; ?>
+                <?php include 'listar_horarios.php'; ?>
             </ul>
         </div>
         <div class="buttons">
             <a href="/index.html">Sair</a>
         </div>
+        <div class="buttons">
+            <form id="delete-account-form" method="post" action="apagar_conta.php" onsubmit="return confirmDelete();">
+                <button type="submit">Deletar Conta</button>
+            </form>
+        </div>
     </div>
+
+    <script>
+        function confirmDelete() {
+            return confirm("Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.");
+        }
+    </script>
 </body>
 </html>
