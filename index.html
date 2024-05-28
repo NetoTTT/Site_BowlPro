@@ -5,15 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BowlPro Entrar</title>
     <style>
+         body {
+            height: 0;
+            background-color: #a809f8;
+            background-image: url(img/1.png);
+            background-repeat: no-repeat;
+            background-size: cover;  
+        }
+
+        h1 {
+            text-align: center;
+            font-style: italic;
+            background-color: #ffffff18;
+            font-family: sans-serif;
+            margin: 5%;
+        }
+
+       select {
+        border-radius: 10px;
+        background-color: #9a9898fb
+       }
+        
         .form-container {
             display: none;
+        }
+        
+        input {
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Você é cliente ou Administrador?</h1>
+    <h1>BEM VINDO!</h1>
     <select id="formSelector" onchange="showForm()">
-        <option value="">Selecione uma das opções</option>
+        <option value="">Clique aqui para fazer login</option>
         <option value="form1">Cliente</option>
         <option value="form2">ADM</option>
     </select>
