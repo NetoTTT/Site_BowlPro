@@ -17,7 +17,7 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style_agendamentos.css">
     <title>Ver Todos os Agendamentos</title>
     <style>
         table {
@@ -67,7 +67,7 @@ $result = $conn->query($sql);
             </table>
             <div>
                 <button type="submit" name="action" value="edit">Editar</button>
-                <button type="submit" name="action" value="delete">Apagar</button>
+                <button type="submit" class="buttons" name="action" value="delete">Apagar</button>
             </div>
         </form>
         <div class="buttons">

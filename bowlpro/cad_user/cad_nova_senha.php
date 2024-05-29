@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Solicitação de Redefinição de Senha</title>
     <style>
         .form-container {
@@ -37,7 +38,7 @@
             <label for="token">Token:</label>
             <input type="text" id="token" name="token" required>
             <button type="submit">Validar Token</button>
-            <button onclick="window.location.href='/index.html'">Voltar</button>
+            <button type="submit" onclick="window.location.href='/index.html'">Voltar</button>
         </form>
     </div>
 </body>

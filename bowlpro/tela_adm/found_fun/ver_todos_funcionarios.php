@@ -9,7 +9,6 @@ if ($conn->connect_error) {
 
 $sql = "SELECT * FROM funcionarios";
 $result = $conn->query($sql);
-
 ?>
 
 <!DOCTYPE html>
@@ -20,6 +19,9 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="css/style.css">
     <title>Ver Todos os Funcionários</title>
     <style>
+        .admin-container {
+            padding: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -35,6 +37,62 @@ $result = $conn->query($sql);
         th {
             background-color: #f2f2f2;
         }
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 819px) {
+            table, th, td {
+                display: block;
+                width: 100%;
+                border: none;
+            }
+            tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                padding: 10px;
+                width: calc(230% - 0px); 
+            }
+            th {
+                display: none;
+            }
+            td {
+                text-align: right;
+                position: relative;
+                padding-left: 50%;
+                white-space: normal;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 100%; 
+                box-sizing: border-box; 
+            }
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: calc(50% - 20px);
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        }
     </style>
 </head>
 <body>
@@ -42,31 +100,28 @@ $result = $conn->query($sql);
         <h1>Lista de Funcionários</h1>
         <table>
             <tr>
-                <th>Nome</th>
-                <th>Telefone</th>
-                <th>Email</th>
-                <th>CPF</th>
-                <th>CARGO</th>
-                <th>CAD Único</th>
+                <th data-label="Nome">Nome</th>
+                <th data-label="Telefone">Telefone</th>
+                <th data-label="Email">Email</th>
+                <th data-label="CPF">CPF</th>
+                <th data-label="Cargo">Cargo</th>
+                <th data-label="CAD Único">CAD Único</th>
             </tr>
             <?php
-            // Verificar se há resultados e exibir os dados em uma tabela
             if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
                     echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row["nome"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["tel"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["email"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["cpf"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["cargo"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["cad_unico"]) . "</td>";
+                    echo "<td data-label='Nome'>" . htmlspecialchars($row["nome"]) . "</td>";
+                    echo "<td data-label='Telefone'>" . htmlspecialchars($row["tel"]) . "</td>";
+                    echo "<td data-label='Email'>" . htmlspecialchars($row["email"]) . "</td>";
+                    echo "<td data-label='CPF'>" . htmlspecialchars($row["cpf"]) . "</td>";
+                    echo "<td data-label='Cargo'>" . htmlspecialchars($row["cargo"]) . "</td>";
+                    echo "<td data-label='CAD Único'>" . htmlspecialchars($row["cad_unico"]) . "</td>";
                     echo "</tr>";
                 }
             } else {
-                echo "<tr><td colspan='5'>Nenhum funcionário encontrado.</td></tr>";
+                echo "<tr><td colspan='6'>Nenhum funcionário encontrado.</td></tr>";
             }
-
-            // Fechar a conexão com o banco de dados
             $conn->close();
             ?>
         </table>
