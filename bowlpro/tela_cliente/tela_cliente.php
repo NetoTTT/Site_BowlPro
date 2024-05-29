@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="css/style.css">
     <title>Perfil do Cliente</title>
     <style>
+        body{   
+            background-color: #4f6077;
+        }
+
         .profile-container {
             display: flex;
             flex-direction: column;

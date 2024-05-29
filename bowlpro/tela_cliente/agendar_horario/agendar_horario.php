@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
     <title>Agendamento de Horário</title>
+    <style>
+        body{
+            background-color: #4f6077;
+        }
+    </style>
 </head>
 <body>
     <div class="profile-container">

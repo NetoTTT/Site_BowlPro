@@ -21,6 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_horario'])) {
     }
 
     $stmt->close();
+} else{ 
+    echo "<script>alert('Nenhum horário foi selecionado.'); window.location.href = 'tela_cliente.php';</script>";
 }
 
 $conn->close();

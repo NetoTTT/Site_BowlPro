@@ -45,6 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
     <link rel="stylesheet" href="css/style.css">
     <title>Editar Agendamento</title>
     <style>
+        body{
+            background-color: #4f6077;
+        }
         .form-container {
             display: flex;
             flex-direction: column;

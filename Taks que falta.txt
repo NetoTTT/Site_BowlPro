@@ -1,6 +1,8 @@
 fazer "esqeuceu a senha" // feito
 coloca a funcionalidades de editar no funcionario
 colocar no cliente a mesma funcionalidades dos agendamentos (apagar)
+coloca CPF funcional (11 digitos)
+coloca apagar cliente pelo CPF
 
 ------------ CODIGO PARA ENVIAR NO EMAIL -------------------
 
