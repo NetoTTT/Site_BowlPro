@@ -1,19 +1,9 @@
 <?php // Abertura do PHP
 
-/*
-
-As variáveis de conexão com o banco de dados:
-
-SERVIDOR - Colocar o endereço do servidor 
-USUÁRIO - Usuário do banco 
-SENHA - senha do banco de dados
-DBNAME - Nome do banco de dados
-
-*/
 
 $servidor = "localhost";
-$usuario = "root";
-$senha = "";
+$usuario = "bowlpro_user";
+$senha = "uhqtYKnatqwdyhZaVVQtVu7RJnGKbbyF";
 $dbname = "bowlpro";
 
 //Criar a conexao
