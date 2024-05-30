@@ -6,25 +6,33 @@ if(isset($_SESSION['email'])) {
     $email_cliente = $_SESSION['email'];
 
     include("conexao.php");
-
-    if ($conn->connect_error) {
-        die("Erro de conexão: " . $conn->connect_error);
+    
+    if (!$conn) {
+        die("Erro de conexão: " . pg_last_error());
     }
 
-    $sql = "SELECT nome FROM clientes WHERE email='$email_cliente'";
-    $result = $conn->query($sql);
+    // Utilizando prepared statements para evitar SQL Injection
+    $result = pg_prepare($conn, "get_nome", 'SELECT nome FROM clientes WHERE email = $1');
+    $result = pg_execute($conn, "get_nome", array($email_cliente));
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $nome_cliente = $row['nome'];
+    if ($result) {
+        if (pg_num_rows($result) > 0) {
+            $row = pg_fetch_assoc($result);
+            $nome_cliente = $row['nome'];
 
-        echo $nome_cliente;
+            echo $nome_cliente;
+        } else {
+            echo "Nome do Cliente";
+        }
     } else {
-        echo "Nome do Cliente";
+        echo "Erro na consulta: " . pg_last_error($conn);
     }
 
-    $conn->close();
+    // Fechar a conexão
+    pg_close($conn);
 } else {
     echo "Nome do Cliente";
 }
 ?>
+
+<!-- asdasdasdasd-->

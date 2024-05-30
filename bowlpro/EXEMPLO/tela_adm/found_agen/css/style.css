@@ -1,0 +1,25 @@
+.admin-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+}
+.admin-actions {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+.admin-actions .actions {
+    margin-right: 20px;
+}
+.admin-actions .actions button, .admin-actions .actions input[type="text"] {
+    display: block;
+    margin-bottom: 10px;
+}
+.buttons {
+    margin-top: 20px;
+}
+.buttons button {
+    margin-right: 10px;
+}

@@ -1,13 +1,18 @@
 <?php // Abertura do PHP
 
-
-$servidor = "dpg-cpbmnn4f7o1s73839h50-a";
-$usuario = "bowlpro_user";
-$senha = "uhqtYKnatqwdyhZaVVQtVu7RJnGKbbyF";
+$host = "dpg-cpbmnn4f7o1s73839h50-a";
+$port = "5432";
 $dbname = "bowlpro";
+$user = "bowlpro_user";
+$password = "uhqtYKnatqwdyhZaVVQtVu7RJnGKbbyF";
 
-//Criar a conexao
-$conn = mysqli_connect($servidor, $usuario, $senha, $dbname); 
+$conn_string = "host=$host port=$port dbname=$dbname user=$user password=$password";
 
+$conn = pg_connect($conn_string);
+
+if (!$conn) {
+    echo "Erro: Não foi possível conectar ao banco de dados.";
+    exit;
+}
 
 ?>

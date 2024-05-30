@@ -9,11 +9,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['cad_unico'])) {
         $cad_unico = $_POST['cad_unico'];
 
-        $sql = "DELETE FROM funcionarios WHERE cad_unico = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $cad_unico);
+        $sql = "DELETE FROM funcionarios WHERE cad_unico = $1";
+        $stmt = pg_prepare($conn, "", $sql);
+        $result = pg_execute($conn, "", array($cad_unico));
 
-        if ($stmt->execute()) {
+        if ($result) {
             header("Location: sucesso_apagar.php");
             exit();
         } else {
@@ -24,8 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$conn->close();
+pg_close($conn);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

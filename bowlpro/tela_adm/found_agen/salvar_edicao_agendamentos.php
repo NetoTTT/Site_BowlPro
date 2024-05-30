@@ -15,6 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $datas = $_POST['data_horario'];
         $horarios = $_POST['horario'];
 
+        // Inicia a transação
+        pg_query($conn, "BEGIN");
+
         // Atualiza os agendamentos um por um
         for ($i = 0; $i < count($ids); $i++) {
             $id = $ids[$i];
@@ -22,22 +25,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $horario = $horarios[$i];
 
             // Prepara e executa a consulta SQL para atualizar os agendamentos
-            $sql = "UPDATE horarios SET data_horario = ?, horario = ? WHERE id_horario = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssi", $data, $horario, $id);
+            $sql = "UPDATE horarios SET data_horario = $1, horario = $2 WHERE id_horario = $3";
+            $stmt = pg_prepare($conn, "", $sql);
+            $result = pg_execute($conn, "", array($data, $horario, $id));
 
-            if (!$stmt->execute()) {
+            if (!$result) {
+                pg_query($conn, "ROLLBACK");
                 $_SESSION['edit_agendamentos_error'] = "Erro ao tentar salvar as alterações.";
-                $stmt->close();
-                $conn->close();
+                pg_close($conn);
                 header("Location: editar_agendamentos.php");
                 exit();
             }
         }
 
-        // Fechamos a conexão e redirecionamos com mensagem de sucesso
-        $stmt->close();
-        $conn->close();
+        // Commit da transação e redirecionamento com mensagem de sucesso
+        pg_query($conn, "COMMIT");
+        pg_close($conn);
         $_SESSION['edit_agendamentos_success'] = "Alterações salvas com sucesso.";
         header("Location: ver_todos_agendamentos.php");
         exit();
@@ -53,3 +56,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 ?>
+

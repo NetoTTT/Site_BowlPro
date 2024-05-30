@@ -3,12 +3,12 @@ session_start();
 
 include("conexao.php");
 
-if ($conn->connect_error) {
-    die("Erro de conexão: " . $conn->connect_error);
+if (!$conn) {
+    die("Erro de conexão: " . pg_last_error());
 }
 
 $sql = "SELECT * FROM funcionarios";
-$result = $conn->query($sql);
+$result = pg_query($conn, $sql);
 ?>
 
 <!DOCTYPE html>
@@ -108,21 +108,22 @@ $result = $conn->query($sql);
                 <th data-label="CAD Único">CAD Único</th>
             </tr>
             <?php
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td data-label='Nome'>" . htmlspecialchars($row["nome"]) . "</td>";
-                    echo "<td data-label='Telefone'>" . htmlspecialchars($row["tel"]) . "</td>";
-                    echo "<td data-label='Email'>" . htmlspecialchars($row["email"]) . "</td>";
-                    echo "<td data-label='CPF'>" . htmlspecialchars($row["cpf"]) . "</td>";
-                    echo "<td data-label='Cargo'>" . htmlspecialchars($row["cargo"]) . "</td>";
-                    echo "<td data-label='CAD Único'>" . htmlspecialchars($row["cad_unico"]) . "</td>";
-                    echo "</tr>";
+                if (pg_num_rows($result) > 0) {
+                    while($row = pg_fetch_assoc($result)) {
+                        echo "<tr>";
+                        echo "<td data-label='Nome'>" . htmlspecialchars($row["nome"]) . "</td>";
+                        echo "<td data-label='Telefone'>" . htmlspecialchars($row["tel"]) . "</td>";
+                        echo "<td data-label='Email'>" . htmlspecialchars($row["email"]) . "</td>";
+                        echo "<td data-label='CPF'>" . htmlspecialchars($row["cpf"]) . "</td>";
+                        echo "<td data-label='Cargo'>" . htmlspecialchars($row["cargo"]) . "</td>";
+                        echo "<td data-label='CAD Único'>" . htmlspecialchars($row["cad_unico"]) . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='6'>Nenhum funcionário encontrado.</td></tr>";
                 }
-            } else {
-                echo "<tr><td colspan='6'>Nenhum funcionário encontrado.</td></tr>";
-            }
-            $conn->close();
+
+                pg_close($conn);
             ?>
         </table>
         <div class="buttons">
