@@ -10,19 +10,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($action == "delete") {
             // Apagar agendamentos selecionados
-            $id_placeholders = implode(',', array_fill(0, count($ids), '$1'));
+            $id_placeholders = implode(',', array_fill(0, count($ids), '?'));
             $sql = "DELETE FROM horarios WHERE id_horario IN ($id_placeholders)";
-            $stmt = pg_prepare($conn, "", $sql);
+            $stmt = $conn->prepare($sql);
 
-            $result = pg_execute($conn, "", $ids);
+            $stmt->bind_param(str_repeat('i', count($ids)), ...$ids);
 
-            if ($result) {
+            if ($stmt->execute()) {
                 $message = "Agendamentos apagados com sucesso.";
             } else {
                 $message = "Erro ao tentar apagar os agendamentos.";
             }
 
-            pg_free_result($result);
+            $stmt->close();
         } elseif ($action == "edit") {
             // Redirecionar para o formulário de edição com os IDs selecionados
             $_SESSION['agendamentos_para_editar'] = $ids;
@@ -38,11 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $message = "Método de requisição inválido.";
 }
 
-pg_close($conn);
+$conn->close();
 
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">

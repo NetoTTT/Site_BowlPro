@@ -3,14 +3,18 @@ session_start();
 
 include("conexao.php");
 
-if ($conn->connect_error) {
-    die("Erro de conexão: " . $conn->connect_error);
+if (!$conn) {
+    die("Erro de conexão: falha ao conectar ao banco de dados.");
 }
 
 $sql = "SELECT * FROM horarios";
-$result = $conn->query($sql);
+$result = pg_query($conn, $sql);
 
+if (!$result) {
+    die("Erro ao executar a consulta: " . pg_last_error($conn));
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

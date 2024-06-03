@@ -10,17 +10,17 @@ include("conexao.php");
 
 $ids = $_SESSION['agendamentos_para_editar'];
 
-$id_placeholders = implode(',', array_fill(0, count($ids), '$1'));
+$id_placeholders = implode(',', array_fill(0, count($ids), '?'));
 $sql = "SELECT * FROM horarios WHERE id_horario IN ($id_placeholders)";
-$stmt = pg_prepare($conn, "", $sql);
-$stmt_params = array_merge(array(str_repeat('i', count($ids))), $ids);
-$result = pg_execute($conn, "", $stmt_params);
-$agendamentos = pg_fetch_all($result);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param(str_repeat('i', count($ids)), ...$ids);
+$stmt->execute();
+$result = $stmt->get_result();
+$agendamentos = $result->fetch_all(MYSQLI_ASSOC);
 
-pg_free_result($result);
-pg_close($conn);
+$stmt->close();
+$conn->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

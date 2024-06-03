@@ -5,21 +5,23 @@ if (!isset($_SESSION['email'])) {
     exit();
 }
 
-include("conexao.php")
+include("conexao.php");
 
-if (!$conn) {
-    die("Erro de conexão: " . pg_last_error());
+if ($conn->connect_error) {
+    die("Erro de conexão: " . $conn->connect_error);
 }
 
 $email_cliente = $_SESSION['email'];
 
-$sql = "SELECT id_horario, data_horario, horario FROM horarios WHERE email_cliente = $1";
-$stmt = pg_prepare($conn, "", $sql);
-$result = pg_execute($conn, "", array($email_cliente));
+$sql = "SELECT id_horario, data_horario, horario FROM horarios WHERE email_cliente = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email_cliente);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if ($result && pg_num_rows($result) > 0) {
+if ($result->num_rows > 0) {
     echo '<form action="apagar_horario.php" method="POST">';
-    while ($row = pg_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         echo '<li>';
         echo '<input type="radio" name="id_horario" value="' . $row["id_horario"] . '">';
         echo ' ID: ' . htmlspecialchars($row["id_horario"]) . ' - ' . htmlspecialchars($row["data_horario"]) . ' - ' . htmlspecialchars($row["horario"]);
@@ -32,6 +34,6 @@ if ($result && pg_num_rows($result) > 0) {
     echo "<li>Nenhum horário agendado para este cliente.</li>";
 }
 
-// Fechar a conexão
-pg_close($conn);
+$stmt->close();
+$conn->close();
 ?>

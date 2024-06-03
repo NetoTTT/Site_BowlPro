@@ -11,23 +11,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cargo = $_POST['cargo'];
     $cad_unico = $_POST['cad_unico'];
 
-    $sql = "INSERT INTO funcionarios (nome, tel, email, cpf, cargo, cad_unico) VALUES ($1, $2, $3, $4, $5, $6)";
+    $sql = "INSERT INTO funcionarios (nome, tel, email, cpf, cargo, cad_unico) VALUES (?, ?, ?, ?, ?, ?)";
 
-    $stmt = pg_prepare($conn, "", $sql);
-    $result = pg_execute($conn, "", array($nome, $tel, $email, $cpf, $cargo, $cad_unico));
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssssss", $nome, $tel, $email, $cpf, $cargo, $cad_unico);
 
-    if ($result) {
+    if ($stmt->execute()) {
         echo "<script>alert('Funcionário cadastrado com sucesso.'); window.location.href = '/bowlpro/tela_adm/tela_adm.html';</script>";
     } else {
         echo "<script>alert('Erro ao cadastrar funcionário.'); window.location.href = 'cadastrar_funcionario.php';</script>";
     }
 
-    pg_free_result($result);
+    $stmt->close();
 }
 
-pg_close($conn);
+$conn->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

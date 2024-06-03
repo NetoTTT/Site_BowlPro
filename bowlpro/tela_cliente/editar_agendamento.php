@@ -1,43 +1,41 @@
 <?php
+include("conexao.php");
 
-session_start();
+if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
+    $id_horario = $_GET['id'];
 
-if (!isset($_SESSION['email'])) {
-    header("Location: /index.html");
+    // Buscar o agendamento específico
+    $sql = "SELECT * FROM horarios WHERE id_horario = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_horario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $agendamento = $result->fetch_assoc();
+
+    if (!$agendamento) {
+        die("Agendamento não encontrado.");
+    }
+} elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_horario'])) {
+    $id_horario = $_POST['id_horario'];
+    $nova_data = $_POST['data_horario'];
+    $novo_horario = $_POST['horario'];
+
+    // Atualizar o agendamento
+    $sql = "UPDATE horarios SET data_horario = ?, horario = ? WHERE id_horario = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssi", $nova_data, $novo_horario, $id_horario);
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Agendamento atualizado com sucesso.'); window.location.href = 'tela_cliente.php';</script>";
+    } else {
+        echo "<script>alert('Erro ao atualizar o agendamento.'); window.location.href = 'editar_agendamento.php?id=$id_horario';</script>";
+    }
+
+    $stmt->close();
+    $conn->close();
     exit();
 }
-
-include("conexao.php")
-
-if (!$conn) {
-    die("Erro de conexão: " . pg_last_error());
-}
-
-$email_cliente = $_SESSION['email'];
-
-$sql = "SELECT id_horario, data_horario, horario FROM horarios WHERE email_cliente = $1";
-$stmt = pg_prepare($conn, "", $sql);
-$result = pg_execute($conn, "", array($email_cliente));
-
-if ($result && pg_num_rows($result) > 0) {
-    echo '<form action="apagar_horario.php" method="POST">';
-    while ($row = pg_fetch_assoc($result)) {
-        echo '<li>';
-        echo '<input type="radio" name="id_horario" value="' . $row["id_horario"] . '">';
-        echo ' ID: ' . htmlspecialchars($row["id_horario"]) . ' - ' . htmlspecialchars($row["data_horario"]) . ' - ' . htmlspecialchars($row["horario"]);
-        echo ' <a href="editar_agendamento.php?id=' . $row["id_horario"] . '">Editar</a>';
-        echo '</li>';
-    }
-    echo '<button type="submit">Cancelar Horário</button>';
-    echo '</form>';
-} else {
-    echo "<li>Nenhum horário agendado para este cliente.</li>";
-}
-
-// Fechar a conexão
-pg_close($conn);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

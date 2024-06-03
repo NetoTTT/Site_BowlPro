@@ -9,11 +9,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = $_POST['email'];
         $senha = $_POST['senha'];
 
-        $sql = "SELECT * FROM clientes WHERE email=$1 AND senha=$2";
-        $stmt = pg_prepare($conn, "", $sql);
-        $result = pg_execute($conn, "", array($email, $senha));
+        $sql = "SELECT * FROM clientes WHERE email='$email' AND senha='$senha'";
+        $result = $conn->query($sql);
 
-        if ($result && pg_num_rows($result) > 0) {
+        if ($result->num_rows > 0) {
             $_SESSION['email'] = $email;
             echo "<script>alert('Login Validado'); window.location.href = 'tela_cliente/tela_cliente.php';</script>";
             exit();
@@ -21,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>alert('Erro ao Logar, Usuario não encontrado'); window.location.href = '/index.html';</script>";
         }
 
+        $conn->close();
     } else {
         echo "<script>alert('Preencha os campos'); window.location.href = '/index.html';</script>";
     }

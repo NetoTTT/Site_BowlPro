@@ -9,39 +9,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['email'])) {
         $email = $_POST['email'];
 
-        pg_query($conn, "BEGIN");
+        $conn->begin_transaction();
 
         try {
-            $sql_delete_agendamentos = "DELETE FROM horarios WHERE email_cliente = $1";
-            $stmt_delete_agendamentos = pg_prepare($conn, "", $sql_delete_agendamentos);
-            $result_delete_agendamentos = pg_execute($conn, "", array($email));
+            $sql_delete_agendamentos = "DELETE FROM horarios WHERE email_cliente = ?";
+            $stmt_delete_agendamentos = $conn->prepare($sql_delete_agendamentos);
+            $stmt_delete_agendamentos->bind_param("s", $email);
+            $stmt_delete_agendamentos->execute();
 
-            $sql_delete_cliente = "DELETE FROM clientes WHERE email = $1";
-            $stmt_delete_cliente = pg_prepare($conn, "", $sql_delete_cliente);
-            $result_delete_cliente = pg_execute($conn, "", array($email));
+            $sql_delete_cliente = "DELETE FROM clientes WHERE email = ?";
+            $stmt_delete_cliente = $conn->prepare($sql_delete_cliente);
+            $stmt_delete_cliente->bind_param("s", $email);
+            $stmt_delete_cliente->execute();
 
-            if (pg_affected_rows($result_delete_cliente) > 0) {
-                pg_query($conn, "COMMIT");
+            if ($stmt_delete_cliente->affected_rows > 0) {
+                $conn->commit();
                 $mensagem = "Cliente apagado com sucesso.";
             } else {
-                pg_query($conn, "ROLLBACK");
+                $conn->rollback();
                 $mensagem = "Nenhum cliente encontrado com esse email.";
             }
 
-            pg_free_result($result_delete_agendamentos);
-            pg_free_result($result_delete_cliente);
+            $stmt_delete_agendamentos->close();
+            $stmt_delete_cliente->close();
         } catch (Exception $e) {
-            pg_query($conn, "ROLLBACK");
+            $conn->rollback();
             $mensagem = "Erro ao tentar apagar o cliente.";
         }
     } else {
         $mensagem = "Por favor, insira um email.";
     }
 
-    pg_close($conn);
+    $conn->close();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

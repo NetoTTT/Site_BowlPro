@@ -10,13 +10,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['cad_unico'])) {
         $cad_unico = $_POST['cad_unico'];
 
-        $sql = "SELECT * FROM funcionarios WHERE cad_unico = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $cad_unico);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $sql = "SELECT * FROM funcionarios WHERE cad_unico = $1";
+        $result = pg_query_params($conn, $sql, array($cad_unico));
 
-        if ($result->num_rows == 0) {
+        if (!$result) {
+            $erro_pesquisa = "Erro na consulta: " . pg_last_error();
+        } elseif (pg_num_rows($result) == 0) {
             $erro_pesquisa = "Funcionário não encontrado.";
         }
     } else {
@@ -24,11 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$conn->close();
+pg_close($conn);
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,7 +68,6 @@ $conn->close();
             background-color: #0056b3;
         }
 
-
         @media (max-width: 819px) {
             table, th, td {
                 display: block;
@@ -84,7 +82,7 @@ $conn->close();
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 padding: 10px;
                 width: calc(230% - 0px);
-                margin-left: 3px; 
+                margin-left: 3px;
             }
             th {
                 display: none;
@@ -123,10 +121,10 @@ $conn->close();
         </form><br><br>
         <?php
         if (!empty($erro_pesquisa)) {
-            echo "<p class='error'>$erro_pesquisa</p>";
+            echo "<p class='error'>" . htmlspecialchars($erro_pesquisa) . "</p>";
         }
         ?>
-        <?php if ($result && $result->num_rows > 0): ?>
+        <?php if ($result && pg_num_rows($result) > 0): ?>
             <table>
                 <tr>
                     <th data-label="Nome">Nome</th>
@@ -136,7 +134,7 @@ $conn->close();
                     <th data-label="Cargo">Cargo</th>
                     <th data-label="CAD Único">CAD Único</th>
                 </tr>
-                <?php while($row = $result->fetch_assoc()): ?>
+                <?php while ($row = pg_fetch_assoc($result)): ?>
                     <tr>
                         <td data-label="Nome"><?php echo htmlspecialchars($row["nome"]); ?></td>
                         <td data-label="Telefone"><?php echo htmlspecialchars($row["tel"]); ?></td>
