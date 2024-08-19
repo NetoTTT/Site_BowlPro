@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Todos os Agendamentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn-back {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .btn-back:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todos os Agendamentos</h1>
+    <table id="agendamentosTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data e Hora</th>
+                <th>Email do Cliente</th>
+                <th>Horário</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Os dados dos agendamentos serão inseridos aqui -->
+        </tbody>
+    </table>
+
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para carregar todos os agendamentos
+        async function carregarAgendamentos() {
+            const agendamentosRef = collection(db, 'horarios');
+            const agendamentosSnapshot = await getDocs(agendamentosRef);
+            const tabela = document.getElementById('agendamentosTable').getElementsByTagName('tbody')[0];
+
+            agendamentosSnapshot.forEach((doc) => {
+                const data = doc.data();
+                const novaLinha = tabela.insertRow();
+                novaLinha.insertCell(0).textContent = doc.id;
+                novaLinha.insertCell(1).textContent = data.data_horario;
+                novaLinha.insertCell(2).textContent = data.email_cliente;
+                novaLinha.insertCell(3).textContent = data.horario;
+            });
+        }
+
+        // Carregar agendamentos ao carregar a página
+        carregarAgendamentos().catch((error) => {
+            console.error("Erro ao carregar agendamentos: ", error);
+            alert("Erro ao carregar agendamentos. Tente novamente.");
+        });
+    </script>
+</body>
+</html>

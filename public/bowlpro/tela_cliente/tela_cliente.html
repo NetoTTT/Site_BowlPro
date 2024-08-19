@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Perfil do Cliente</title>
+    <style>
+        body {   
+            background-color: #4f6077;
+        }
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            background-color: gray;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+        .buttons a,
+        .buttons button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .buttons a:hover,
+        .buttons button:hover {
+            background-color: #0056b3;
+        }
+        .appointments ul {
+            list-style: none;
+            padding: 0;
+        }
+        .appointments ul li {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .appointments ul li input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-pic" id="profilePic">P</div>
+        <div><h2 id="clientName">Carregando...</h2></div>
+        <div class="buttons">
+            <a href="agendar_horario/agendar_horario.html">Agendar um horário</a>
+        </div>
+        <div class="appointments">
+            <h3>Horários Agendados:</h3>
+            <ul id="appointmentsList">
+                <li>Carregando...</li>
+            </ul>
+        </div>
+        <div class="buttons">
+            <button id="cancelButton">Cancelar Horários Selecionados</button>
+        </div>
+        <div class="buttons">
+            <a href="/index.html">Sair</a>
+        </div>
+        <div class="buttons">
+            <button onclick="deleteAccount()">Deletar Conta</button>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        function displayUserInfo() {
+            console.log('DisplayUserInfo called');
+            onAuthStateChanged(auth, (user) => {
+                console.log('User state changed:', user);
+                if (user) {
+                    document.getElementById('clientName').textContent = user.email;
+
+                    // Fetch and display appointments
+                    const appointmentsList = document.getElementById('appointmentsList');
+                    appointmentsList.innerHTML = ''; // Clear existing list
+
+                    // Query the `horarios` collection for documents where `email_cliente` matches the user's email
+                    const appointmentsRef = collection(db, 'horarios');
+                    const q = query(appointmentsRef, where("email_cliente", "==", user.email));
+
+                    getDocs(q).then((querySnapshot) => {
+                        console.log('Appointments fetched:', querySnapshot);
+                        querySnapshot.forEach((doc) => {
+                            const data = doc.data();
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <input type="checkbox" value="${doc.id}">
+                                Data: ${data.data_horario}, Horário: ${data.horario}
+                            `;
+                            appointmentsList.appendChild(li);
+                        });
+                        if (appointmentsList.children.length === 0) {
+                            appointmentsList.innerHTML = '<li>Nenhum horário agendado.</li>';
+                        }
+                    }).catch((error) => {
+                        console.error('Erro ao buscar horários: ', error);
+                        appointmentsList.innerHTML = '<li>Erro ao carregar horários.</li>';
+                    });
+
+                } else {
+                    console.log('Usuário não autenticado');
+                    // Optionally redirect to login or handle accordingly
+                }
+            });
+        }
+
+        async function cancelSelected() {
+            const selectedCheckboxes = document.querySelectorAll('#appointmentsList input[type="checkbox"]:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('Selecione ao menos um horário para cancelar.');
+                return;
+            }
+
+            if (confirm("Tem certeza que deseja cancelar os horários selecionados?")) {
+                for (const checkbox of selectedCheckboxes) {
+                    console.log('Cancelando horário com ID:', checkbox.value);
+                    try {
+                        await deleteDoc(doc(db, 'horarios', checkbox.value));
+                        checkbox.parentElement.remove(); // Remove the list item from the UI
+                    } catch (error) {
+                        console.error('Erro ao cancelar horário: ', error);
+                        alert('Erro ao cancelar horário. Tente novamente.');
+                    }
+                }
+                alert('Horários selecionados foram cancelados com sucesso.');
+            }
+        }
+
+        function deleteAccount() {
+            if (confirm("Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.")) {
+                const user = auth.currentUser;
+                if (user) {
+                    deleteUser(user).then(() => {
+                        window.location.href = '/index.html';
+                    }).catch((error) => {
+                        alert('Erro ao deletar conta: ' + error.message);
+                    });
+                } else {
+                    alert('Nenhum usuário está logado.');
+                }
+            }
+        }
+
+        // Attach event listener to the button after the DOM is fully loaded
+        window.onload = function() {
+            displayUserInfo();
+            document.getElementById('cancelButton').addEventListener('click', cancelSelected);
+        }
+    </script>
+</body>
+</html>

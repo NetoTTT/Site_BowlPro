@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Todos os Funcionários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .funcionario-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .funcionario {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .funcionario h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        .funcionario p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="funcionario-container">
+        <h1>Todos os Funcionários</h1>
+        <div id="funcionarios-list"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5" 
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function verTodosFuncionarios() {
+            const funcionariosRef = collection(db, 'funcionarios');
+            const funcionariosSnapshot = await getDocs(funcionariosRef);
+            let funcionariosList = document.getElementById('funcionarios-list');
+            funcionariosList.innerHTML = ''; // Limpa a lista antes de adicionar novos funcionários
+            funcionariosSnapshot.forEach((doc) => {
+                let funcionarioData = doc.data();
+                funcionariosList.innerHTML += `
+                    <div class="funcionario">
+                        <h2>${funcionarioData.nome}</h2>
+                        <p><strong>Cargo:</strong> ${funcionarioData.cargo}</p>
+                        <p><strong>Email:</strong> ${funcionarioData.email}</p>
+                        <p><strong>Idade:</strong> ${funcionarioData.idade}</p>
+                        <p><strong>Telefone:</strong> ${funcionarioData.tel}</p>
+                        <p><strong>CPF:</strong> ${funcionarioData.cpf}</p>
+                        <p><strong>CAD Único:</strong> ${funcionarioData.cad_unico}</p>
+                    </div>
+                `;
+            });
+        }
+
+        verTodosFuncionarios();
+    </script>
+</body>
+</html>

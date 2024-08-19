@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apagar Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn-submit {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .btn-back {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Apagar Cliente</h1>
+        <form id="apagarClienteForm">
+            <div class="form-group">
+                <label for="email">E-mail do Cliente:</label>
+                <input type="email" id="email" placeholder="Digite o e-mail do cliente" required>
+            </div>
+            <button type="submit" class="btn-submit">Apagar Cliente</button>
+        </form>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para apagar cliente
+        document.getElementById('apagarClienteForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+
+            try {
+                // Consulta para encontrar o cliente pelo e-mail
+                const q = query(collection(db, 'clientes'), where('email', '==', email));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alert('Nenhum cliente encontrado com este e-mail.');
+                    return;
+                }
+
+                // Apagar o cliente
+                querySnapshot.forEach(async (docSnapshot) => {
+                    await deleteDoc(doc(db, 'clientes', docSnapshot.id));
+                });
+
+                alert('Cliente apagado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao apagar cliente:', error);
+                alert('Erro ao apagar cliente. Tente novamente.');
+            }
+        });
+    </script>
+</body>
+</html>

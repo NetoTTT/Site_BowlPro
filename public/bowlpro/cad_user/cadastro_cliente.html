@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Cadastro - Seja Bem-Vindo(a)</title>
+</head>
+<body>
+    <h1>Cadastro - Seja Bem-Vindo(a)</h1>
+    <form id="registrationForm">
+        <div>
+            <strong>Nome:</strong>
+            <br>
+            <input type="text" id="name" placeholder="Digite seu nome" required>
+        </div>
+        <br>
+        <div>
+            <strong>Idade:</strong>
+            <br>
+            <input type="number" id="age" placeholder="Digite sua idade" required>
+        </div>
+        <br>
+        <div>
+            <strong>Telefone:</strong>
+            <br>
+            <input type="text" id="phone" placeholder="Digite seu telefone" required>
+        </div>
+        <br>
+        <div>
+            <strong>Email:</strong>
+            <br>
+            <input type="email" id="email" placeholder="Digite seu email" required>
+        </div>
+        <br>
+        <div>
+            <strong>Senha:</strong>
+            <br>
+            <input type="password" id="password" placeholder="Digite sua senha" required>
+        </div>
+        <br>
+        <div>
+            <button type="submit">Enviar</button>
+        </div>
+    </form>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('registrationForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Criar usuário com email e senha
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+                // Salvar dados do usuário no Firestore com ID automático
+                const docRef = await addDoc(collection(db, 'clientes'), {
+                    nome: name,
+                    idade: age,
+                    tel: phone,
+                    email: email,
+                    uid: userCredential.user.uid,
+                    Web: "True" 
+                });
+
+                alert('Cadastro realizado com sucesso! ID do documento: ' + docRef.id);
+                window.location.href = '/index.html';
+
+            } catch (error) {
+                alert('Erro ao cadastrar: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

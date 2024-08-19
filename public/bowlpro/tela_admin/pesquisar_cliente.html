@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisar Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item p {
+            margin: 5px 0;
+        }
+        .result-item strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pesquisar Cliente</h1>
+    <form id="pesquisarClienteForm">
+        <input type="text" id="pesquisa" placeholder="Pesquisar Cliente por Nome ou Email" required>
+        <button type="submit">Pesquisar</button>
+    </form>
+    <div id="resultados" class="results"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para pesquisar clientes
+        document.getElementById('pesquisarClienteForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const pesquisa = document.getElementById('pesquisa').value;
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = ''; // Limpa resultados anteriores
+
+            try {
+                // Consulta por nome ou email
+                const qNome = query(collection(db, 'clientes'), where('nome', '==', pesquisa));
+                const qEmail = query(collection(db, 'clientes'), where('email', '==', pesquisa));
+                const querySnapshotNome = await getDocs(qNome);
+                const querySnapshotEmail = await getDocs(qEmail);
+
+                let resultadosHtml = '';
+                querySnapshotNome.forEach((doc) => {
+                    const clienteData = doc.data();
+                    resultadosHtml += `
+                        <div class="result-item">
+                            <p><strong>Nome:</strong> ${clienteData.nome}</p>
+                            <p><strong>Email:</strong> ${clienteData.email}</p>
+                            <p><strong>Telefone:</strong> ${clienteData.tel}</p>
+                        </div>
+                    `;
+                });
+
+                querySnapshotEmail.forEach((doc) => {
+                    const clienteData = doc.data();
+                    resultadosHtml += `
+                        <div class="result-item">
+                            <p><strong>Nome:</strong> ${clienteData.nome}</p>
+                            <p><strong>Email:</strong> ${clienteData.email}</p>
+                            <p><strong>Telefone:</strong> ${clienteData.tel}</p>
+                        </div>
+                    `;
+                });
+
+                if (resultadosHtml === '') {
+                    resultadosHtml = '<p>Nenhum cliente encontrado.</p>';
+                }
+
+                resultadosDiv.innerHTML = resultadosHtml;
+            } catch (error) {
+                console.error("Erro ao pesquisar clientes: ", error);
+                resultadosDiv.innerHTML = '<p>Erro ao pesquisar clientes. Tente novamente.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

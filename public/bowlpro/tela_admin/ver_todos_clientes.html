@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Todos os Clientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .cliente-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .cliente {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .cliente h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        .cliente p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="cliente-container">
+        <h1>Todos os Clientes</h1>
+        <div id="clientes-list"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para visualizar todos os clientes
+        async function verTodosClientes() {
+            const clientesRef = collection(db, 'clientes');
+            const clientesSnapshot = await getDocs(clientesRef);
+            let clientesList = document.getElementById('clientes-list');
+            clientesList.innerHTML = ''; // Limpa a lista antes de adicionar novos clientes
+            clientesSnapshot.forEach((doc) => {
+                let clienteData = doc.data();
+                clientesList.innerHTML += `
+                    <div class="cliente">
+                        <h2>${clienteData.nome}</h2>
+                        <p><strong>Email:</strong> ${clienteData.email}</p>
+                        <p><strong>Telefone:</strong> ${clienteData.tel}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Chama a função ao carregar a página
+        verTodosClientes();
+    </script>
+</body>
+</html>

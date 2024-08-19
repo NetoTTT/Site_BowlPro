@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisar Funcionário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item p {
+            margin: 5px 0;
+        }
+        .result-item strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pesquisar Funcionário</h1>
+    <form id="pesquisarFuncionarioForm">
+        <input type="text" id="pesquisa" placeholder="Pesquisar por Nome, CAD Único, CPF, Telefone ou Email" required>
+        <button type="submit">Pesquisar</button>
+    </form>
+    <div id="resultado-pesquisa" class="results"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('pesquisarFuncionarioForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const pesquisa = document.getElementById('pesquisa').value.toLowerCase();
+            const resultadoDiv = document.getElementById('resultado-pesquisa');
+            resultadoDiv.innerHTML = ''; // Limpa resultados anteriores
+
+            try {
+                // Consultas para nome, CAD único, CPF, telefone ou email
+                const funcionariosRef = collection(db, 'funcionarios');
+                const qNome = query(funcionariosRef, where('nome', '==', pesquisa));
+                const qCadUnico = query(funcionariosRef, where('cad_unico', '==', pesquisa));
+                const qCpf = query(funcionariosRef, where('cpf', '==', pesquisa));
+                const qTel = query(funcionariosRef, where('tel', '==', pesquisa));
+                const qEmail = query(funcionariosRef, where('email', '==', pesquisa));
+
+                const querySnapshots = await Promise.all([
+                    getDocs(qNome),
+                    getDocs(qCadUnico),
+                    getDocs(qCpf),
+                    getDocs(qTel),
+                    getDocs(qEmail)
+                ]);
+
+                let resultadosHtml = '';
+                querySnapshots.forEach((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const funcionarioData = doc.data();
+                        resultadosHtml += `
+                            <div class="result-item">
+                                <p><strong>ID:</strong> ${doc.id}</p>
+                                <p><strong>Nome:</strong> ${funcionarioData.nome}</p>
+                                <p><strong>CAD Único:</strong> ${funcionarioData.cad_unico}</p>
+                                <p><strong>CPF:</strong> ${funcionarioData.cpf}</p>
+                                <p><strong>Telefone:</strong> ${funcionarioData.tel}</p>
+                                <p><strong>Email:</strong> ${funcionarioData.email}</p>
+                                <p><strong>Cargo:</strong> ${funcionarioData.cargo}</p>
+                                <p><strong>Idade:</strong> ${funcionarioData.idade}</p>
+                            </div>
+                        `;
+                    });
+                });
+
+                if (resultadosHtml === '') {
+                    resultadosHtml = '<p>Nenhum funcionário encontrado.</p>';
+                }
+
+                resultadoDiv.innerHTML = resultadosHtml;
+            } catch (error) {
+                console.error("Erro ao pesquisar funcionários: ", error);
+                resultadoDiv.innerHTML = '<p>Erro ao pesquisar funcionários. Tente novamente.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
