@@ -11,32 +11,27 @@
     <h1>Cadastro - Seja Bem-Vindo(a)</h1>
     <form id="registrationForm">
         <div>
-            <strong>Nome:</strong>
-            <br>
+            <strong>Nome:</strong><br>
             <input type="text" id="name" placeholder="Digite seu nome" required>
         </div>
         <br>
         <div>
-            <strong>Idade:</strong>
-            <br>
+            <strong>Idade:</strong><br>
             <input type="number" id="age" placeholder="Digite sua idade" required>
         </div>
         <br>
         <div>
-            <strong>Telefone:</strong>
-            <br>
+            <strong>Telefone:</strong><br>
             <input type="text" id="phone" placeholder="Digite seu telefone" required>
         </div>
         <br>
         <div>
-            <strong>Email:</strong>
-            <br>
+            <strong>Email:</strong><br>
             <input type="email" id="email" placeholder="Digite seu email" required>
         </div>
         <br>
         <div>
-            <strong>Senha:</strong>
-            <br>
+            <strong>Senha:</strong><br>
             <input type="password" id="password" placeholder="Digite sua senha" required>
         </div>
         <br>
@@ -52,27 +47,25 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+        const firebaseConfig = {        
+             apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
             authDomain: "bowlpro-ec076.firebaseapp.com",
             projectId: "bowlpro-ec076",
             storageBucket: "bowlpro-ec076.appspot.com",
             messagingSenderId: "175588769343",
             appId: "1:175588769343:web:59988d10487dff421a428a",
-            measurementId: "G-D72HFDW6M5"
-        };
+            measurementId: "G-D72HFDW6M5"};
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         document.getElementById('registrationForm').addEventListener('submit', async (event) => {
             event.preventDefault();
+            console.log('Formulário enviado');
 
             const name = document.getElementById('name').value;
             const age = document.getElementById('age').value;
@@ -80,22 +73,33 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            try {
-                // Criar usuário com email e senha
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            console.log({ name, age, phone, email, password });
 
-                // Salvar dados do usuário no Firestore com ID automático
-                const docRef = await addDoc(collection(db, 'clientes'), {
+            try {
+                const emailQuery = query(collection(db, 'email_cadastrados'), where('email', '==', email));
+                const emailSnapshot = await getDocs(emailQuery);
+
+                if (!emailSnapshot.empty) {
+                    alert('Este e-mail já está registrado. Verifique seu e-mail.');
+                    return;
+                }
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await addDoc(collection(db, 'email_cadastrados'), { email: email });
+                await sendEmailVerification(user);
+
+                await addDoc(collection(db, 'clientes_temporarios'), {
                     nome: name,
                     idade: age,
-                    tel: phone,
+                    telefone: phone,
                     email: email,
-                    uid: userCredential.user.uid,
-                    Web: "True" 
+                    uid: user.uid,
                 });
 
-                alert('Cadastro realizado com sucesso! ID do documento: ' + docRef.id);
-                window.location.href = '/index.html';
+                alert('Um e-mail de verificação foi enviado para ' + email + '. Por favor, verifique seu e-mail.');
+                window.location.href = 'verificar_email.html';
 
             } catch (error) {
                 alert('Erro ao cadastrar: ' + error.message);

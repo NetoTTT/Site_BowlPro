@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manipulador de Ações</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, verifyPasswordResetCode, confirmPasswordReset, applyActionCode, checkActionCode } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const getParameterByName = (name) => {
+                const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                    results = regex.exec(window.location.href);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, ' '));
+            };
+
+            const mode = getParameterByName('mode');
+            const actionCode = getParameterByName('oobCode');
+            const continueUrl = getParameterByName('continueUrl');
+            const lang = getParameterByName('lang') || 'en';
+
+            switch (mode) {
+                case 'resetPassword':
+                    handleResetPassword(actionCode, continueUrl);
+                    break;
+                case 'verifyEmail':
+                    handleVerifyEmail(actionCode, continueUrl);
+                    break;
+                default:
+                    alert('Ação não reconhecida.');
+            }
+        });
+
+        async function handleResetPassword(actionCode, continueUrl) {
+            try {
+                const email = await verifyPasswordResetCode(auth, actionCode);
+                // Exibir UI para o usuário inserir uma nova senha
+                const newPassword = prompt('Digite sua nova senha:');
+                await confirmPasswordReset(auth, actionCode, newPassword);
+                alert('Senha redefinida com sucesso!');
+                if (continueUrl) {
+                    window.location.href = continueUrl;
+                }
+            } catch (error) {
+                alert('Erro ao redefinir a senha: ' + error.message);
+            }
+        }
+
+        async function handleVerifyEmail(actionCode) {
+            try {
+                await applyActionCode(auth, actionCode);
+               
+                window.location.href = 'https://bowlpro-ec076.web.app/bowlpro/cad_user/confirmar_email.html';
+            } catch (error) {
+                alert('Erro ao verificar o e-mail: ' + error.message);
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+    <h1>Manipulador de Ações</h1>
+    <p>Aguarde enquanto processamos sua solicitação...</p>
+</body>
+
+</html>

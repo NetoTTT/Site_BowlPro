@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar E-mail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        input, button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Confirmar E-mail</h1>
+        <p>Digite seu e-mail para confirmar seu cadastro.</p>
+        <input type="email" id="emailInput" placeholder="Digite seu e-mail" required>
+        <button id="confirmButton">Confirmar</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, applyActionCode, checkActionCode, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {        
+            apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
+            authDomain: "bowlpro-ec076.firebaseapp.com",
+            projectId: "bowlpro-ec076",
+            storageBucket: "bowlpro-ec076.appspot.com",
+            messagingSenderId: "175588769343",
+            appId: "1:175588769343:web:59988d10487dff421a428a",
+            measurementId: "G-D72HFDW6M5" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('confirmButton').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value;
+
+            if (!email) {
+                alert('Por favor, digite seu e-mail.');
+                return;
+            }
+
+            try {
+                // Verificar se o e-mail está registrado no Firebase Auth
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+                if (signInMethods.length > 0) {
+                    // Código de ação presente na URL
+                    const queryParams = new URLSearchParams(window.location.search);
+                    const oobCode = queryParams.get('oobCode');
+
+                    if (oobCode) {
+                        // Aplicar o código de ação
+                        await applyActionCode(auth, oobCode);
+
+                        // Obter o e-mail do código de ação
+                        const actionCodeInfo = await checkActionCode(auth, oobCode);
+                        const actionEmail = actionCodeInfo.data.email;
+
+                        if (actionEmail === email) {
+                            // E-mail encontrado no Firebase Auth
+                            const userCredential = await auth.signInWithEmailLink(email, window.location.href);
+                            const user = userCredential.user;
+
+                            if (user.emailVerified) {
+                                // Buscar o usuário na coleção `clientes_temporarios`
+                                const tempClientsQuery = query(collection(db, 'clientes_temporarios'), where('email', '==', email));
+                                const tempClientsSnapshot = await getDocs(tempClientsQuery);
+
+                                if (!tempClientsSnapshot.empty) {
+                                    const tempClientDoc = tempClientsSnapshot.docs[0];
+                                    const tempClientData = tempClientDoc.data();
+
+                                    // Transferir os dados para `clientes`
+                                    await addDoc(collection(db, 'clientes'), {
+                                        nome: tempClientData.nome,
+                                        idade: tempClientData.idade,
+                                        tel: tempClientData.telefone,
+                                        email: email,
+                                        uid: user.uid,
+                                        Web: "True"
+                                    });
+
+                                    // Remover o documento da coleção `clientes_temporarios`
+                                    await deleteDoc(doc(db, 'clientes_temporarios', tempClientDoc.id));
+
+                                    alert('Cadastro completado com sucesso!');
+                                    window.location.href = '/index.html';
+                                } else {
+                                    alert('Não encontramos um cadastro temporário com este e-mail.');
+                                }
+                            } else {
+                                alert('E-mail não verificado ou usuário não encontrado.');
+                            }
+                        } else {
+                            alert('O e-mail fornecido não corresponde ao e-mail de verificação.');
+                        }
+                    } else {
+                        alert('Código de verificação ausente.');
+                    }
+                } else {
+                    // Se o e-mail não estiver registrado no Firebase Auth
+                    const tempClientsQuery = query(collection(db, 'clientes_temporarios'), where('email', '==', email));
+                    const tempClientsSnapshot = await getDocs(tempClientsQuery);
+
+                    if (!tempClientsSnapshot.empty) {
+                        const tempClientDoc = tempClientsSnapshot.docs[0];
+                        const tempClientData = tempClientDoc.data();
+
+                        // Adicionar o usuário em `clientes`
+                        await addDoc(collection(db, 'clientes'), {
+                            nome: tempClientData.nome,
+                            idade: tempClientData.idade,
+                            tel: tempClientData.telefone,
+                            email: email,
+                            uid: "N/A", // O UID não está disponível aqui
+                            Web: "True"
+                        });
+
+                        // Remover o documento da coleção `clientes_temporarios`
+                        await deleteDoc(doc(db, 'clientes_temporarios', tempClientDoc.id));
+
+                        alert('Cadastro completado com sucesso!');
+                        window.location.href = '/index.html';
+                    } else {
+                        alert('Não encontramos um cadastro temporário com este e-mail.');
+                    }
+                }
+            } catch (error) {
+                alert('Erro ao confirmar o e-mail: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
