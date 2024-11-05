@@ -10,6 +10,7 @@
             display: none;
         }
     </style>
+    
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
@@ -53,7 +54,7 @@
         };
 
         // Define login function for Admin
-        window.loginAdmin = function() {
+        loginAdmin = function() {
             const email = document.getElementById('emailAdm').value;
             const password = document.getElementById('senhaAdm').value;
 

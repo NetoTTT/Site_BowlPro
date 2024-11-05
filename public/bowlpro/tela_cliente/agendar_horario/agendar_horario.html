@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
         body {
             background-color: #4f6077;
         }
+
         .profile-container {
             display: flex;
             flex-direction: column;
@@ -16,6 +18,7 @@
             justify-content: center;
             height: 100vh;
         }
+
         .profile-pic {
             width: 200px;
             height: 50px;
@@ -28,17 +31,25 @@
             font-size: 1.5rem;
             margin: 20px 0;
         }
-        form {
+
+        form,
+        #qrCodeContainer {
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 20px;
         }
+
         label {
             margin-bottom: 5px;
         }
-        input, select, button {
+
+        input,
+        select,
+        button {
             margin: 10px 0;
         }
+
         button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -47,9 +58,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         .buttons a {
             display: inline-block;
             margin-top: 20px;
@@ -59,11 +72,13 @@
             text-decoration: none;
             border-radius: 5px;
         }
+
         .buttons a:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
+
 <body>
     <div class="profile-container">
         <div class="profile-pic">Agendar</div>
@@ -87,6 +102,8 @@
             <button type="submit">Agendar</button>
         </form>
 
+        <div id="qrCodeContainer"></div> <!-- Container do QR Code -->
+
         <div class="buttons">
             <a href="/bowlpro/tela_cliente/tela_cliente.html">Voltar</a>
         </div>
@@ -101,7 +118,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-        
+
         const firebaseConfig = {
             apiKey: "AIzaSyD1Rdncy8QRG6ZXJAPaPTz0fo4TulbrP7I",
             authDomain: "bowlpro-ec076.firebaseapp.com",
@@ -116,31 +133,91 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        async function agendarHorario(data, horario, email) {
+            try {
+                await addDoc(collection(db, "horarios"), {
+                    data_horario: data,
+                    horario: horario,
+                    email_cliente: email,
+                    timestamp: new Date() // Adiciona a data/hora atual
+                });
+                alert('Horário agendado com sucesso!');
+                window.location.href = '../tela_cliente.html'; // Redireciona para a tela do cliente
+            } catch (error) {
+                console.error('Erro ao agendar horário:', error);
+                alert('Erro ao agendar horário. Tente novamente.');
+            }
+        }
+
+
+        async function verificarPagamento(paymentId, data, horario, email) {
+            const intervalo = setInterval(async () => {
+                try {
+                    const response = await fetch('https://sitebowlproserver-production.up.railway.app/verificar-pagamento', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ payment_id: paymentId })
+                    });
+
+                    const status = await response.json();
+
+                    if (status.status === 'approved') {
+                        clearInterval(intervalo);
+                        alert('Pagamento confirmado! Horário agendado com sucesso.');
+                        await agendarHorario(data, horario, email); // Chama a função de agendamento
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar pagamento:', error);
+                }
+            }, 5000);
+        }
+
+
+
+
+
         document.getElementById('appointmentForm').addEventListener('submit', async (event) => {
             event.preventDefault();
 
             const data = document.getElementById('data').value;
             const horario = document.getElementById('horario').value;
-
             const user = auth.currentUser;
+
             if (user) {
                 try {
-                    await addDoc(collection(db, 'horarios'), {
-                        data_horario: data,
-                        email_cliente: user.email,
-                        horario: horario
+                    const response = await fetch('https://sitebowlproserver-production.up.railway.app/criar-pagamento-pix', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            valor: 1.00, // Exemplo de valor do serviço
+                            descricao: `Agendamento para ${data} às ${horario}`,
+                            email: user.email
+                        })
                     });
-                    alert('Horário agendado com sucesso!');
-                    window.location.href = '../tela_cliente.html'; 
+
+                    const { paymentId, qrCodeBase64 } = await response.json(); // Remove o qrCode, se não for usado
+
+                    // Exibe o QR Code no frontend
+                    const qrCodeContainer = document.getElementById('qrCodeContainer');
+                    qrCodeContainer.innerHTML = `
+                        <p>Valor a ser pago: R$ 1,00</p> <!-- Mostra o valor aqui -->
+                        <img src="data:image/png;base64,${qrCodeBase64}" alt="QR Code para pagamento" style="width: 300px; height: 300px;">
+                    `;
+                    // Inicia a verificação do pagamento
+                    verificarPagamento(paymentId, data, horario, user.email); // Passa os dados adicionais para a função
                 } catch (error) {
-                    console.error('Erro ao agendar horário: ', error);
-                    alert('Erro ao agendar horário. Tente novamente.');
+                    console.error('Erro ao criar pagamento PIX:', error);
                 }
             } else {
                 alert('Você precisa estar logado para agendar um horário.');
-                window.location.href = 'index.html';
             }
         });
+
+
+
     </script>
 </body>
+
 </html>
